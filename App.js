@@ -9,8 +9,9 @@ import Home from './src/screens/containers/home';
 import Header from './src/sections/components/header';
 import SuggestionList from './src/videos/containers/suggestion-list';
 import CategoryList from './src/videos/containers/category-list';
-import Video from 'react-native-video';
 import API from './utils/api';
+import Player from './src/player/containers/player';
+import LoaderLayout from './src/sections/components/loader-layout';
 
 type Props = {};
 export default class App extends Component<Props> {
@@ -37,39 +38,14 @@ export default class App extends Component<Props> {
       <Header>
       {/* SearchBar */}
       </Header>
-      <View
-        style={{
-          flex: 1,
-          height: 200,
-       }}
-      >
-        <Video 
-          source={{uri: 'https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4' }}
-          style={{
-            position: 'absolute',
-            left: 0,            
-            right: 0,
-            bottom: 0,
-            top: 0,
-          }}
-        />
-      </View>
-      
-        <Text>Header</Text>
-        <Text>Buscador</Text>
-        <Text>Categorías</Text>
+      <Player />
         {
           loading ? 
-          <View>
-            <ActivityIndicator
-              size='small'
-              color='#0000ff'
-            />
-          </View>
+          <LoaderLayout>
+            <ActivityIndicator color='#0000ff'/>
+          </LoaderLayout>
           :
-          <CategoryList 
-            list={categoryList}
-          />
+          <CategoryList list={categoryList} />
         }  
         {
           !loading &&
