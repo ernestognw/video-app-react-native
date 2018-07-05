@@ -11,7 +11,7 @@
     "react-native": "0.55.4",
     "react-native-material-ui": "^1.30.0",
     "react-native-vector-icons": "^4.6.0",
-    "react-native-video": "2.1.1",
+    "react-native-video": "2.3.1",
     "rnpm": "^1.9.0"
   },
   "devDependencies": {
