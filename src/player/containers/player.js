@@ -7,62 +7,72 @@ import PlayPause from '../components/play-pause';
 import ProgressBar from '../components/progress-bar';
 import TimeLeft from '../components/time-left';
 import FullScreen from '../components/fullscreen';
+import { connect } from 'react-redux';
+import { store, persistor } from '../../../store';
 
 class Player extends Component {
-  state = {
-    loading: true,        // Indicador de carga
-    paused: false,        // Indicador de pausa
-    progress: 0,          // Progreso del video entre 0 y 1
-    currentTime: '0:00',  // Tiempo actual en segundos
-    duration: 0,          // Duración del vídeo en segundos
-    changeActive: false,  // Activo mientras se cambia la posición del vídeo
-    fullscreen: false,
-  }
   onLoad = () => {
-    this.setState({
-      loading: false,
+    store.dispatch({
+      type: 'VIDEO_STOP_LOADING',
+      payload: {
+        videoLoading: false,     
+      }
     })
   }
   PlayPause = () => {
-    this.setState({
-      paused: !this.state.paused,
+    store.dispatch({
+      type: 'PLAY_PAUSE_VIDEO',
+      payload: {
+        paused: !this.props.paused,    
+      }
     })
   }
   setTime = payload => {
-    let duration = payload.currentTime / 60;
-    let mins = Math.floor(duration);
-    let seconds = duration % 1;
-    seconds = (seconds * 60) / 1000;
-    let currentTime = (mins + seconds * 10).toFixed(2);
-    this.setState({
-      currentTime: currentTime,
-      progress: (payload.currentTime / payload.seekableDuration ),
-      duration: payload.seekableDuration,
+    let currentTime = timeReadable(payload.currentTime);
+    store.dispatch({
+      type: 'UPDATE_PROGRESS',
+      payload: {
+        currentTime,
+        progress: (payload.currentTime / payload.seekableDuration),
+        duration: payload.seekableDuration,
+      }
     })
   }
   changeSliderStarted = (value) => {
-    this.setState({
-      progress: value,
-      changeActive: true,
+    store.dispatch({
+      type: 'CHANGE_SLIDER_STARTED',
+      payload: {
+        progress: value,
+        currentTime: timeReadable(this.props.duration * value),
+        changeActive: true,
+      }
     })
   }
   changeSliderFinished = (value) => {
-    this.setState({
-      changeActive: false,
+    store.dispatch({
+      type: 'CHANGE_SLIDER_FINISHED',
+      payload: {
+        changeActive: false,
+      }
     })
-    this.player.seek(this.state.duration * value)
+    this.player.seek(this.props.duration * value)
   }
   setFullScreenPromise = () => {
     return new Promise((resolve, reject) => {
-      resolve(this.setState({
-        fullscreen: !this.state.fullscreen
-      }))
+      resolve(
+        store.dispatch({
+          type: 'SET_FULLSCREEN',
+          payload: {
+            fullscreen: !this.props.fullscreen,     
+          }
+        })
+      )
     }).catch(error => console.error(error))
   }
   FullScreen = event => {
     this.setFullScreenPromise()
       .then(() => {
-        if(this.state.fullscreen) {
+        if(this.props.fullscreen) {
           this.player.presentFullscreenPlayer();
         }
         else {
@@ -73,7 +83,7 @@ class Player extends Component {
   render() { 
     return (
       <Layout
-      loading={this.state.loading}
+      loading={this.props.loading}
       video={
         <Video
           ref={(ref) => {
@@ -84,9 +94,9 @@ class Player extends Component {
           resizeMode='contain'
           onLoad={this.onLoad}
           paused={
-            this.state.changeActive ?
+            this.props.changeActive ?
             true :
-            this.state.paused
+            this.props.paused
             }
           onProgress={this.setTime}
         />
@@ -98,16 +108,16 @@ class Player extends Component {
         <ControlLayout>
           <PlayPause 
             onPress={this.PlayPause}
-            paused={this.state.paused}
+            paused={this.props.paused}
           />
           <ProgressBar 
-            progress={this.state.progress}
+            progress={this.props.progress}
             onChangeStarted={this.changeSliderStarted}
             onChangeFinished={this.changeSliderFinished}
           />
           <TimeLeft 
-            currentTime={this.state.currentTime}
-            duration={this.state.duration}            
+            currentTime={this.props.currentTime}
+            duration={this.props.duration}            
           />
           <FullScreen
             onPress={this.FullScreen}
@@ -129,4 +139,25 @@ const styles = StyleSheet.create({
   }
 })
 
-export default Player;
+function timeReadable (time) {
+  let duration = time / 60;
+  let mins = Math.floor(duration);
+  let seconds = duration % 1;
+  seconds = (seconds * 60) / 1000;
+  let currentTime = (mins + seconds * 10).toFixed(2);
+  return currentTime;
+}
+
+function mapStateToProps (state) {
+  return { 
+    loading: state.videoLoading,        
+    paused: state.paused,
+    progress: state.progress,
+    currentTime: state.currentTime,
+    duration: state.duration,
+    changeActive: state.changeActive,
+    fullscreen: state.fullscreen,
+  }
+}
+
+export default connect(mapStateToProps)(Player);

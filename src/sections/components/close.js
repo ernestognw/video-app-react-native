@@ -1,11 +1,8 @@
 import React from 'react';
-import { 
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
+import { Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-function PlayPause (props){
+function Close(props){
   return (
     <TouchableOpacity
       onPress={props.onPress}
@@ -17,11 +14,7 @@ function PlayPause (props){
         right: 5,
       }}
     >
-      {
-        props.paused ?
-        <Icon name="play-arrow" size={20} color="#98ca3f" /> :
-        <Icon name="pause" size={20} color="#98ca3f" />
-      }
+      <Icon name="close" size={20} color="#121212" />    
     </TouchableOpacity>
   )
 }
@@ -30,8 +23,7 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: 'center',
     paddingHorizontal: 10,
-    marginVertical: 5,
   }
 })
 
-export default PlayPause;
+export default Close;

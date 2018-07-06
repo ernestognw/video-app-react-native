@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
-import { View, FlatList } from 'react-native';
+import { View, FlatList, ActivityIndicator } from 'react-native';
 import HorizontalSeparator from '../../sections/components/horizontal-separator';
 import Category from '../components/category';
 import Empty from '../components/empty';
-import Layout from '../components/category-list-layout'
+import Layout from '../components/category-list-layout';
+import { connect } from 'react-redux';
+import LoaderLayout from '../../sections/components/loader-layout';
 
 class CategoryList extends Component {
   keyExtractor = item => item.id.toString();
@@ -21,6 +23,11 @@ class CategoryList extends Component {
       <Layout
         title='Categorías'
       >
+      {
+        this.props.loading ?
+        <LoaderLayout>
+          <ActivityIndicator color='#0000ff'/>
+        </LoaderLayout> :
         <FlatList
           horizontal 
           keyExtractor={this.keyExtractor}
@@ -29,10 +36,18 @@ class CategoryList extends Component {
           ItemSeparatorComponent={this.itemSeparator}
           renderItem={this.renderItem}
         />
+      }
       </Layout>
       
     )
   }
 }
 
-export default CategoryList;
+function mapStateToProps(state) {
+  return {
+    list: state.categoryList,
+    loading: state.categoryLoading
+  }
+}
+
+export default connect(mapStateToProps)(CategoryList);
